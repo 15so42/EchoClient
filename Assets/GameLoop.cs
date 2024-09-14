@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
+using Timer = System.Threading.Timer;
 
 public class GameLoop : MonoBehaviour
 {
@@ -9,7 +12,7 @@ public class GameLoop : MonoBehaviour
     public GameObject humanPfb;
     [HideInInspector]
     public BaseHuman myHuman;
-    public Dictionary<string, BaseHuman> otherHumans;
+    public Dictionary<string, BaseHuman> otherHumans=new Dictionary<string, BaseHuman>();
 
     // Start is called before the first frame update
     void Start()
@@ -40,7 +43,14 @@ public class GameLoop : MonoBehaviour
         NetManager.Send(sendStr);
         
         //发送list协议请求玩家列表
-        NetManager.Send("List|");
+        SendListRequest();
+
+    }
+    // 使用异步方法代替线程
+    public async void SendListRequest()
+    {
+        await Task.Delay(1000);  // 等待1秒
+        NetManager.Send("List|");  // 发送请求
     }
     
     
@@ -107,10 +117,33 @@ public class GameLoop : MonoBehaviour
     void OnMove(string msg)
     {
         Debug.Log("OnMove："+msg);
+        string[] split = msg.Split(',');
+        string desc = split[0];
+        float x = float.Parse(split[1]);
+        float y = float.Parse(split[2]);
+        float z = float.Parse(split[3]);
+
+        if (!otherHumans.ContainsKey(desc))
+        {
+            return;
+        }
+
+        BaseHuman h = otherHumans[desc];
+        Vector3 targetPos = new Vector3(x, y, z);
+        h.MoveTo(targetPos);
     }
 
     void OnLeave(string msg)
     {
         Debug.Log("OnLeave："+msg);
+        string[] split = msg.Split(',');
+        string desc = split[0];
+        
+        if(!otherHumans.ContainsKey(desc))
+            return;
+
+        BaseHuman h = otherHumans[desc];
+        Destroy(h.gameObject);
+        otherHumans.Remove(desc);
     }
 }
