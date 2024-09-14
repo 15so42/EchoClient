@@ -13,6 +13,7 @@ public class BaseHuman : MonoBehaviour
     private static readonly int Speed = Animator.StringToHash("Speed");
 
     public string desc;
+
     // Start is called before the first frame update
     protected void Start()
     {
@@ -22,13 +23,21 @@ public class BaseHuman : MonoBehaviour
     }
 
     // Update is called once per frame
-    protected void Update()
+    protected void Update() 
     {
         if (navMeshAgent)
         {
-            animator.SetFloat(Speed,navMeshAgent.speed);
+            animator.SetFloat(Speed, navMeshAgent.velocity.magnitude);
         }
-       
-       
+
+
     }
+
+    public virtual void MoveTo(Vector3 targetPos)
+    {
+
+        navMeshAgent.SetDestination(targetPos);
+    }
+
+
 }

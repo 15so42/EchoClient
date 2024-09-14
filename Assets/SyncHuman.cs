@@ -4,15 +4,10 @@ using UnityEngine;
 
 public class SyncHuman : BaseHuman
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+    public void SyncAttack(float eulerY)
     {
-        
+        transform.eulerAngles = new Vector3(transform.eulerAngles.x, eulerY, transform.eulerAngles.z);
+        animator.SetTrigger("Attack");
     }
 }
